@@ -8,10 +8,12 @@
                  [ring "1.4.0"]
                  [org.clojure/java.jdbc "0.6.1"]
                  [mysql/mysql-connector-java "6.0.5"]
-                 [environ "1.1.0"]]
+                 [environ "1.1.0"]
+                 [org.clojure/data.json "0.2.6"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
-            [lein-environ "1.1.0"]]
+            [lein-environ "1.1.0"]
+            [lein-ring "0.11.0"]]
 
   :min-lein-version "2.5.3"
 
@@ -55,7 +57,8 @@
 
     ]}
 
-  :main todo-mvc.server
+  :ring { :handler todo-mvc.handler/handler
+          :init todo-mvc.dataaccess/initiate-tables!}
 
   :aot [todo-mvc.server]
 
