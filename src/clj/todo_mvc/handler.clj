@@ -1,5 +1,5 @@
 (ns todo-mvc.handler
-  (:require [compojure.core :refer [GET defroutes context routes]]
+  (:require [compojure.core :refer [GET PUT defroutes context routes]]
             [compojure.route :refer [resources]]
             [ring.util.response :refer [resource-response]]
             [ring.middleware.reload :refer [wrap-reload]]
@@ -8,11 +8,11 @@
 (defroutes api-routes
   (context "/api/todos" []
     (GET "/" [] (core/get-all-todos))
-;     (PUT "/" [] (insert-new-todo))
-;     (PUT "/:todo-id" [todo-id] (update-todo todo-id))
-;     (PUT "/:todo-id/complete" [todo-id] (mark-complete todo-id))
-;     (PUT "/:todo-id/incomplete" [todo-id] (mark-incomplete todo-id))
-;     (DELETE "/:todo-id" [todo-id] (delete-todo todo-id))
+    (PUT "/" {body :body} (core/insert-new-todo (slurp body)))
+;     (PUT "/:todo-id" [todo-id] (core/update-todo todo-id))
+;     (PUT "/:todo-id/complete" [todo-id] (core/mark-complete todo-id))
+;     (PUT "/:todo-id/incomplete" [todo-id] (core/mark-incomplete todo-id))
+;     (DELETE "/:todo-id" [todo-id] (core/delete-todo todo-id))
     ))
 
 (defroutes home-routes
