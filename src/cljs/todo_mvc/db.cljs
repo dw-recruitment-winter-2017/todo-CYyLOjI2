@@ -1,4 +1,5 @@
-(ns todo-mvc.db)
+(ns todo-mvc.db
+  (:require [reagent.core :as reagent]))
 
 (def default-db
-  {:name "re-frame"})
+  (reagent/atom {:todos []}))

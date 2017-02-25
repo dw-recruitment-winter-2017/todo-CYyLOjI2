@@ -24,17 +24,18 @@
   (marking-function da/db-info todo-id)
   (build-serializable-todo (da/get-todo da/db-info todo-id)))
 
-(defn handle-marking [marking-function todo-id]
+(defn with-todo-existence-check [handler-function todo-id]
   (let [original-todo (da/get-todo da/db-info todo-id)
         error-msg (str "Could not find todo with id " todo-id)]
     (if (some? original-todo)
-      (json-response 200 (save-marking marking-function todo-id))
+      (json-response 200 (handler-function todo-id))
       (json-response 404 {:errors [error-msg]}))))
 
 ; get /
 (defn get-all-todos []
   (let [all-todos (da/get-all-todos da/db-info)
         updated-all-todos (map build-serializable-todo all-todos)]
+  (println "we're getting all the todos")
   (json/write-str updated-all-todos)))
 
 ; post /
@@ -53,8 +54,16 @@
 
 ; put /:todo-id/complete
 (defn mark-complete [todo-id]
-  (handle-marking da/mark-complete! todo-id))
+  (with-todo-existence-check (partial save-marking da/mark-complete!) todo-id))
 
 ; put /:todo-id/incomplete
 (defn mark-incomplete [todo-id]
-  (handle-marking da/mark-incomplete! todo-id))
+  (with-todo-existence-check (partial save-marking da/mark-incomplete!) todo-id))
+
+; delete /:todo-id
+(defn delete-todo-and-notify [todo-id]
+  (da/delete-todo! da/db-info todo-id)
+  {:completed true})
+
+(defn delete-todo [todo-id]
+  (with-todo-existence-check delete-todo-and-notify todo-id))

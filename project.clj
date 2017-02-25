@@ -9,11 +9,14 @@
                  [org.clojure/java.jdbc "0.6.1"]
                  [mysql/mysql-connector-java "6.0.5"]
                  [environ "1.1.0"]
-                 [org.clojure/data.json "0.2.6"]]
+                 [org.clojure/data.json "0.2.6"]
+                 [day8.re-frame/http-fx "0.1.2"]
+                 [cljs-ajax "0.5.8"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-environ "1.1.0"]
-            [lein-ring "0.11.0"]]
+            [lein-ring "0.11.0"]
+            [lein-figwheel "0.5.9"]]
 
   :min-lein-version "2.5.3"
 
@@ -28,7 +31,7 @@
   {:dev
    {:dependencies [[binaryage/devtools "0.8.2"]]
 
-    :plugins      [[lein-figwheel "0.5.7"]]
+    :plugins      [[lein-figwheel "0.5.9"]]
     }}
 
   :cljsbuild

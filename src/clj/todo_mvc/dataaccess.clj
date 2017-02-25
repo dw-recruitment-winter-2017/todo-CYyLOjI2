@@ -41,11 +41,14 @@
 (defn update-todo! [db todo-id description]
   (jdbc/update! db :todos {:description description} ["id = ?" todo-id]))
 
+(defn save-marking! [db todo-id marking-value]
+  (jdbc/update! db :todos {:complete marking-value} ["id = ?" todo-id]))
+
 (defn mark-complete! [db todo-id]
-  (jdbc/update! db :todos {:complete 1} ["id = ?" todo-id]))
+  (save-marking! db todo-id 1))
 
 (defn mark-incomplete! [db todo-id]
-  (jdbc/update! db :todos {:complete 0} ["id = ?" todo-id]))
+  (save-marking! db todo-id 0))
 
 (defn delete-todo! [db todo-id]
   (jdbc/delete! db :todos ["id = ?" todo-id]))
