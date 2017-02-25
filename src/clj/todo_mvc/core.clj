@@ -4,6 +4,7 @@
             [todo-mvc.dataaccess :as da]
             [clojure.data.json :as json]))
 
+; utilities
 (defn json-response [status-code body]
   (println "status-code " status-code " body " body)
   {:status status-code
@@ -16,15 +17,44 @@
       (handler json-content))
     (catch Exception e (json-response 400 {:errors ["Request body must be valid json"]}))))
 
+(defn build-serializable-todo [todo]
+  (update-in todo [:complete] = 1))
+
+(defn save-marking [marking-function todo-id]
+  (marking-function da/db-info todo-id)
+  (build-serializable-todo (da/get-todo da/db-info todo-id)))
+
+(defn handle-marking [marking-function todo-id]
+  (let [original-todo (da/get-todo da/db-info todo-id)
+        error-msg (str "Could not find todo with id " todo-id)]
+    (if (some? original-todo)
+      (json-response 200 (save-marking marking-function todo-id))
+      (json-response 404 {:errors [error-msg]}))))
+
+; get /
 (defn get-all-todos []
   (let [all-todos (da/get-all-todos da/db-info)
-        updated-all-todos (map #(update-in % [:complete] = 1) all-todos)]
+        updated-all-todos (map build-serializable-todo all-todos)]
   (json/write-str updated-all-todos)))
 
+; post /
+(defn save-new-todo-and-return [description]
+  (let [insert-response (da/insert-new-todo! da/db-info description)
+        todo-id (get (first insert-response) :generated_key)]
+        (build-serializable-todo (da/get-todo da/db-info todo-id))))
+
+(defn do-insert [todo-content]
+  (if (contains? todo-content "description")
+    (json-response 200 (save-new-todo-and-return (get todo-content "description")))
+    (json-response 400 {:errors ["Request must contain 'description' key"]})))
+
 (defn insert-new-todo [request-body]
-  (let [do-insert (fn [todo-content]
-      (if (contains? todo-content "description")
-        (json-response 200 (da/insert-new-todo! da/db-info (get request-body "description")))
-        (json-response 400 {:errors ["Request must contain 'description' key"]}))
-    )]
-    (with-json do-insert request-body)))
+  (with-json do-insert request-body))
+
+; put /:todo-id/complete
+(defn mark-complete [todo-id]
+  (handle-marking da/mark-complete! todo-id))
+
+; put /:todo-id/incomplete
+(defn mark-incomplete [todo-id]
+  (handle-marking da/mark-incomplete! todo-id))
