@@ -12,13 +12,18 @@
     [:td
       [:input {:type "checkbox"
                :checked (get todo "complete")
-               :on-change #(dispatch [:toggle-completed (get todo "id")])}]]])
+               :on-change #(dispatch [:toggle-completed (get todo "id")])}]]
+    [:td
+      [:input { :type "button"
+                :value "X"
+                :on-click #(dispatch [:delete-todo (get todo "id")])}]]])
 
 (defn new-todo [new-todo-description]
   [:tr {:key "new-line"}
     [:td [:input {:type "text"
                   :value new-todo-description
                   :on-change #(dispatch [:update-new-todo-description (-> % .-target .-value)])}]]
+    [:td ""]
     [:td [:input {:type "button"
                   :value "+"
                   :on-click #(dispatch [:add-new-todo])}]]])

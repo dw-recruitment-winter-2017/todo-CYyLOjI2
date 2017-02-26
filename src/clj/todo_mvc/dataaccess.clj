@@ -12,16 +12,17 @@
 
 (defn table-exists [db table-name]
   (let [table-count (jdbc/db-do-commands db [(str "show tables like '" table-name "'")])]
-    (> (count table-count) 0)))
+    (and (> (count table-count) 0) (not= (first table-count) 0))))
 
 (defn create-tables! [db]
+  (println "creating tables, table exists already? " (table-exists db "todos"))
   (if (not (table-exists db "todos"))
     (jdbc/db-do-commands db
       (jdbc/create-table-ddl :todos
         [[:id :integer "PRIMARY KEY" "AUTO_INCREMENT"]
          [:description :text]
          [:complete :integer "DEFAULT 0"]
-         [:added :timestamp]
+         [:added :datetime]
         ])))
   )
 
@@ -36,7 +37,7 @@
   (first (jdbc/query db ["select id, description, complete from todos where id = ?" todo-id])))
 
 (defn insert-new-todo! [db description]
-  (jdbc/insert! db :todos {:description description :complete 0}))
+  (jdbc/insert! db :todos {:description description :complete 0 :added (java.util.Date.)}))
 
 (defn update-todo! [db todo-id description]
   (jdbc/update! db :todos {:description description} ["id = ?" todo-id]))

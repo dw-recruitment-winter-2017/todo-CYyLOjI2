@@ -7,7 +7,6 @@
 
 ; utilities
 (defn json-response [status-code body]
-  (println "status-code " status-code " body " body)
   {:status status-code
    :headers {"Content-Type" "application/json"}
    :body (json/write-str body)})
