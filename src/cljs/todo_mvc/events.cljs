@@ -73,9 +73,11 @@
 (re-frame/reg-event-db
   :add-new-todo
   (fn [db _]
-    (let [new-todo {"id" 9000 "description" (:new-todo-description @db) "completed" false}
-          updated-todos (conj (:todos @db) new-todo)]
-    (.log js/console (str "updated todos " updated-todos " new todo description " (:new-todo-description @db)))
+    (let [todos (:todos @db)
+          current-description (:new-todo-description @db)
+          current-max-id (reduce (fn [curr-max todo] (if (> curr-max (get todo "id")) curr-max (get todo "id"))) todos)
+          new-id (inc current-max-id)
+          new-todo {"id" new-id "description" (:new-todo-description @db) "completed" false}
+          updated-todos (conj todos new-todo)]
     (swap! db assoc :todos updated-todos :new-todo-description "")
-    (.log js/console (str "updated db " @db))
     db)))
