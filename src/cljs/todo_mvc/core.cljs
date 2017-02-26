@@ -21,4 +21,4 @@
   (re-frame/dispatch-sync [:initialize-db])
   (dev-setup)
   (mount-root)
-  (re-frame/dispatch-sync [:load-todo-data "http://localhost:3000/api/todos"]))
+  (re-frame/dispatch-sync [:load-todo-data]))

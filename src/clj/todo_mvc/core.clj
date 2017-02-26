@@ -2,14 +2,14 @@
   (:require [environ.core :refer [env]]
             [clojure.java.jdbc :as jdbc]
             [todo-mvc.dataaccess :as da]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [clojure.string :as str]))
 
 ; utilities
 (defn json-response [status-code body]
   (println "status-code " status-code " body " body)
   {:status status-code
-   :headers {"Content-Type" "application/json"
-             }
+   :headers {"Content-Type" "application/json"}
    :body (json/write-str body)})
 
 (defn with-json [handler content]
@@ -67,3 +67,10 @@
 
 (defn delete-todo [todo-id]
   (with-todo-existence-check delete-todo-and-notify todo-id))
+
+; options were required during testing so here's this
+(defn stupid-standard-cors-preflight-response [methods]
+  {:status 200
+   :headers {"Access-Control-Allow-Origin" "*"
+             "Access-Control-Allow-Methods" (str/join methods)
+             "Access-Control-Allow-Headers" "X-Requested-With,Content-Type"}})

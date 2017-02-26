@@ -11,3 +11,8 @@
   :completed-only
   (fn [db _]
     (:completed-only @db)))
+    
+(reg-sub
+  :new-todo-description
+  (fn [db _]
+    (:new-todo-description @db)))

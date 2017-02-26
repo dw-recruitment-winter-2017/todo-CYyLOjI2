@@ -10,7 +10,7 @@
                  [mysql/mysql-connector-java "6.0.5"]
                  [environ "1.1.0"]
                  [org.clojure/data.json "0.2.6"]
-                 [day8.re-frame/http-fx "0.1.2"]
+                 [day8.re-frame/http-fx "0.1.3"]
                  [cljs-ajax "0.5.8"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]

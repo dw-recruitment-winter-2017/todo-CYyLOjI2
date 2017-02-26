@@ -9,18 +9,13 @@
  (fn  [_ _]
    db/default-db))
 
-(defn build-get-all-todos-request [uri]
-  (if (nil? uri)
-    nil
-    { :method :get
-      :uri uri
-      :response-format (ajax/json-response-format)
-      :on-success [:process-todos-list]}))
-
 (re-frame/reg-event-fx
   :load-todo-data
-  (fn [{:keys [db]} [_ uri]]
-    {:http-xhrio (build-get-all-todos-request uri)
+  (fn [{:keys [db]} [_]]
+    {:http-xhrio { :method :get
+                   :uri "http://localhost:3000/api/todos"
+                   :response-format (ajax/json-response-format)
+                   :on-success [:process-todos-list]}
      :db db}))
 
 (re-frame/reg-event-fx
@@ -41,12 +36,46 @@
     (swap! db assoc :completed-only true)
     db))
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
   :toggle-completed
-  (fn [db [_ todo-id]]
+  (fn [{:keys [db]} [_ todo-id]]
     (let [todos (:todos @db)
           todo (first (filter #(= (get % "id") todo-id) todos))
-          updated-todo (assoc todo "complete" (not (get todo "complete")))
-          updated-todos (map (fn [todo] (if (= (get todo "id") todo-id) updated-todo todo)) todos)]
+          is-complete (get todo "complete")
+          updated-todo (assoc todo "complete" (not is-complete))
+          updated-todos (map (fn [todo] (if (= (get todo "id") todo-id) updated-todo todo)) todos)
+          server-action (if is-complete "incomplete" "complete")] ; this is the action we want to perform on the server
     (swap! db assoc :todos updated-todos)
+    {:db db
+     :dispatch [:update-todo-completion-status todo-id server-action]})))
+
+(re-frame/reg-event-fx
+  :update-todo-completion-status
+  (fn [{:keys [db]} [_ todo-id server-action]]
+    {:http-xhrio { :method :put
+                   :uri (str "http://localhost:3000/api/todos/" todo-id "/" server-action)
+                   :format (ajax/json-request-format)
+                   :response-format (ajax/json-response-format)
+                   :on-success [:standard-server-success]}
+     :db db}))
+
+(re-frame/reg-event-fx
+  :standard-server-success
+  (fn [{:keys [db]}]
+  {:db db})) ; do nothing for now
+
+(re-frame/reg-event-db
+  :update-new-todo-description
+  (fn [db [_ description]]
+    (swap! db assoc :new-todo-description description)
+    db))
+
+(re-frame/reg-event-db
+  :add-new-todo
+  (fn [db _]
+    (let [new-todo {"id" 9000 "description" (:new-todo-description @db) "completed" false}
+          updated-todos (conj (:todos @db) new-todo)]
+    (.log js/console (str "updated todos " updated-todos " new todo description " (:new-todo-description @db)))
+    (swap! db assoc :todos updated-todos :new-todo-description "")
+    (.log js/console (str "updated db " @db))
     db)))

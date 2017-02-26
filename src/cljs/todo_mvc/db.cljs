@@ -3,4 +3,5 @@
 
 (def default-db
   (reagent/atom {:todos []
-                 :completed-only false}))
+                 :completed-only false
+                 :new-todo-description ""}))
