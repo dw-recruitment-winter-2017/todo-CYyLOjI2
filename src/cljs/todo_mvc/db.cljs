@@ -2,4 +2,5 @@
   (:require [reagent.core :as reagent]))
 
 (def default-db
-  (reagent/atom {:todos []}))
+  (reagent/atom {:todos []
+                 :completed-only false}))

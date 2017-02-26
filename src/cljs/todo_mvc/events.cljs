@@ -20,13 +20,33 @@
 (re-frame/reg-event-fx
   :load-todo-data
   (fn [{:keys [db]} [_ uri]]
-    (.log js/console "let's get our todos from uri" uri)
     {:http-xhrio (build-get-all-todos-request uri)
      :db db}))
 
 (re-frame/reg-event-fx
   :process-todos-list
   (fn [{:keys [db]} [_ todo-data]]
-    (.log js/console (str "todo data = " todo-data))
     (swap! db assoc :todos todo-data)
     {:db db}))
+
+(re-frame/reg-event-db
+  :show-all-todos
+  (fn [db _]
+    (swap! db assoc :completed-only false)
+    db))
+
+(re-frame/reg-event-db
+  :show-completed-tods-only
+  (fn [db _]
+    (swap! db assoc :completed-only true)
+    db))
+
+(re-frame/reg-event-db
+  :toggle-completed
+  (fn [db [_ todo-id]]
+    (let [todos (:todos @db)
+          todo (first (filter #(= (get % "id") todo-id) todos))
+          updated-todo (assoc todo "complete" (not (get todo "complete")))
+          updated-todos (map (fn [todo] (if (= (get todo "id") todo-id) updated-todo todo)) todos)]
+    (swap! db assoc :todos updated-todos)
+    db)))

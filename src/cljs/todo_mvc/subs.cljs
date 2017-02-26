@@ -1,8 +1,13 @@
 (ns todo-mvc.subs
     (:require-macros [reagent.ratom :refer [reaction]])
-    (:require [re-frame.core :as re-frame]))
+    (:require [re-frame.core :refer [reg-sub]]))
 
-(re-frame/reg-sub
+(reg-sub
  :todos
- (fn [db]
+ (fn [db _]
    (:todos @db)))
+
+(reg-sub
+  :completed-only
+  (fn [db _]
+    (:completed-only @db)))

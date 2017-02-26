@@ -8,7 +8,8 @@
 (defn json-response [status-code body]
   (println "status-code " status-code " body " body)
   {:status status-code
-   :headers {"Content-Type" "application/json"}
+   :headers {"Content-Type" "application/json"
+             }
    :body (json/write-str body)})
 
 (defn with-json [handler content]
@@ -35,7 +36,6 @@
 (defn get-all-todos []
   (let [all-todos (da/get-all-todos da/db-info)
         updated-all-todos (map build-serializable-todo all-todos)]
-  (println "we're getting all the todos")
   (json/write-str updated-all-todos)))
 
 ; post /
