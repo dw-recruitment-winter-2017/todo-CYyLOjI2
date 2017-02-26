@@ -6,8 +6,8 @@
     [:label [:input {:type "radio" :name "display" :checked (not display-completed-only) :on-change #(dispatch [:show-all-todos])}] "All"]
     [:label [:input {:type "radio" :name "display" :checked display-completed-only :on-change #(dispatch [:show-completed-tods-only])}] "Completed Only"]])
 
-(defn todos-element [todo]
-  [:tr {:key (get todo "id")}
+(defn todos-element [index todo]
+  [:tr {:key (str "todo-idx-" index)}
     [:td (get todo "description")]
     [:td
       [:input {:type "checkbox"
@@ -26,7 +26,7 @@
 (defn todos-list [todos display-completed-only new-todo-description]
   (let [filter-func (if display-completed-only #(get % "complete") identity)
         filtered-todos (filter filter-func todos)
-        todo-elements (map todos-element filtered-todos)]
+        todo-elements (map-indexed todos-element filtered-todos)]
     [:table [:tbody todo-elements (new-todo new-todo-description)]]))
 
 (defn main-panel []
