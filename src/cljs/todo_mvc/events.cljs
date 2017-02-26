@@ -64,15 +64,20 @@
   (fn [{:keys [db]}]
   {:db db})) ; do nothing for now
 
+(re-frame/reg-event-fx
+  :standard-server-failure
+  (fn [{:keys [db]}]
+  {:db db})) ; do nothing for now
+
 (re-frame/reg-event-db
   :update-new-todo-description
   (fn [db [_ description]]
     (swap! db assoc :new-todo-description description)
     db))
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
   :add-new-todo
-  (fn [db _]
+  (fn [{:keys [db]} _]
     (let [todos (:todos @db)
           current-description (:new-todo-description @db)
           current-max-id (reduce (fn [curr-max todo] (if (> curr-max (get todo "id")) curr-max (get todo "id"))) todos)
@@ -80,4 +85,17 @@
           new-todo {"id" new-id "description" (:new-todo-description @db) "completed" false}
           updated-todos (conj todos new-todo)]
     (swap! db assoc :todos updated-todos :new-todo-description "")
-    db)))
+    { :db db
+      :dispatch [:save-new-todo current-description]})))
+
+(re-frame/reg-event-fx
+  :save-new-todo
+  (fn [{:keys [db]} [_ description]]
+    { :http-xhrio { :method :post
+                    :uri (str "http://localhost:3000/api/todos/")
+                    :format (ajax/json-request-format)
+                    :response-format (ajax/json-response-format)
+                    :body (.stringify js/JSON (clj->js { :description description }))
+                    :on-success [:standard-server-success]
+                    :on-failure [:standard-server-failure]}
+      :db db}))
