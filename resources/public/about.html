@@ -6,6 +6,23 @@
   </head>
   <body>
     <h3>About this app</h3>
-    <p>This Todo-MVC uses a ring/compojure backend and a re-frame front end.</p>
+    <p>This Todo-MVC uses a ring/compojure backend and re-frame front end.  It expects to have use a mysql database backend.  I did the configuration for the mysql backend by adding a profiles.clj file to the root of that project.  My version of that file, which is not checked into version control, looked like this:</p>
+    <p><pre>
+{:dev  {:env {:dbtype "mysql" :dbhost "localhost" :dbname "tododev" :dbuser "tododev" :dbpw "tododev"}}
+ :test {:env {:dbtype "mysql" :dbhost "localhost" :dbname "todotest" :dbuser "todotest" :dbpw "todotest"}}}
+    </pre></p>
+    <p>Ring will try to run todo-mvc.dataaccess/initiate-tables! on startup - this will create the single TODOs table.  This application currently has the concept only of a single list: all users get to add to the same list and there's no separation at all.  Routes are created in handler.clj.  Those routes then defer to some light business logic in core.clj, and those functions in turn rely on data access functions defined in dataaccess.clj</p>
+    <p>The front-end is a classical re-frame frontend with no routing.  db.cljs defines the base application store; in re-frame, there should only be one source of state for the entire application - as far as I understand it. subs.cljs creates subscription functions (in this application, all of them quite simple) which feed the components created in views.cljs.  Since all views are created in views.cljs, that's a pretty hefty file - it probably could have been broken up better.  Elements which cause actions dispatch events which are defined in events.cljs.  Many of those actions notify the backend of changes.  In this application, for the sake of simplicity, it's assumed that these notifications keep the front-end and the back-end in sync; surely there are better strategies for creating a stronger guarantee of front-end/back-end state equality.</p>
+    <p>I went way over the time limit on this project - but I was happy to, as I hadn't done a full web app in Clojure before and I learned a huge amount from doing this project.  Still: there are more things which I should have done, above and beyond the issues mentioned already:</p>
+    <ul>
+      <li>First and foremost: tests.  There's no testing strategy at here at all, which probably ate more of my time overall than it saved me.</li>
+      <li>Styling.  There's no CSS at all, and it might have been nice to use a nicer component library on the front-end, like React Material UI or some such.  The app could certainly look a whole lot better, especially the add and delete buttons.</li>
+      <li>I didn't do a great job of naming the resources to mark todos as complete and incomplete.  Instead of having that be part of the URL, I should have accepted a request body which performed a specified marking of complete and incomplete.  On the other hand, I didn't use a toggle completed message, which would have broken idempotency - meaning I shouldn't use a PUT.  The fact that I retained idempotency for the endpoint makes me happy.</li>
+      <li>It's assumed that resource endpoints will be on the server that delivers the front-end assets.  This was already kind of funky during development: I was running the front end on figwheel, which used a different port than the ring server - so for a long time, I had to hardcode urls.  Which wasn't great.  Plus, I had to create strange OPTIONS routes for Google Chrome preflight checks which had to do with the CORS checking Chrome was doing.  Certainly, I wish I had better techniques to handle this.</li>
+      <li>When front-end notifications to the server fail, there's basically no strategy at all to handle that.  It would be great to have a circuit breaker pattern in place which, when the circuit breaker popped, would notify the user that changes they are currently making are not being saved to the back-end due to connection failure.</li>
+      <li>All over the place, I'm sure there were better, more clojure-idiosyncratic functions to use.</li>
+      <li>And this is hardly an exhaustive list.</li>
+    </ul>
+    <p>Despite the issues in this application, it was a lot of fun to write it and I'm thankful for the time and consideration reviewers have shown to me as an applicant.</p>
   </body>
 </html>

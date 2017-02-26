@@ -19,7 +19,7 @@
 
 (defroutes home-routes
   (GET "/" [] (resource-response "index.html" {:root "public"}))
-  (GET "/about" [] (resource-response "about.html") {:root "public"})
+  (GET "/about" [] (resource-response "about.html" {:root "public"}))
   (resources "/"))
 
 (def dev-handler (-> #'routes wrap-reload))
